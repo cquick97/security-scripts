@@ -9,7 +9,7 @@ fi
 install_cracklib()
 {
     echo "libpam-cracklib not installed... Installing."
-    wait 3
+    sleep 3
     apt-get update
     apt-get install libpam-cracklib
 }
