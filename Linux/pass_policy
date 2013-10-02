@@ -1,0 +1,63 @@
+#!/bin/bash
+#Run as root
+
+if [[ $EUID -ne 0 ]]; then
+        echo "This script must be run as root" 1>&2
+        exit 1
+fi
+
+install_cracklib()
+{
+    echo "libpam-cracklib not installed... Installing."
+    wait 3
+    apt-get update
+    apt-get install libpam-cracklib
+}
+
+echo "Checking for libpam-cracklib..."
+dpkg -l | grep -qw libpam-cracklib || install_cracklib       #Install libpam-cracklib if not installed.
+
+##Failed login attempts
+echo "Copy this text into /etc/pam.d/common-auth:
+
+auth optional pam_tally.so deny=5 unlock_time=900 onerr=fail audit even_deny_root_account silent"
+
+read -p "Press any key when ready to open the file in nano. You won't be able to go back without restarting the script."
+nano /etc/pam.d/common-auth
+
+## Password Length and Composition
+echo "Copy this text to the correct location in /etc/pam.d/common-password:
+
+password requisite pam_cracklib.so retry=3 minlen=8 difok=3 reject_username minclass=3 maxrepeat=2 dcredit=1 ucredit=1 lcredit=1 ocredit=1"
+
+read -p "Press any key when ready to open the file in nano. You won't be able to go back without restarting the script."
+nano /etc/pam.d/common-password
+
+##Password History
+echo "Copy this text to the correct location in /etc/pam.d/common-password:
+
+password requisite pam_pwhistory.so use_authtok remember=24 enforece_for_root"
+
+read -p "Press any key when ready to open the file in nano. You won't be able to go back without restarting the script."
+nano /etc/pam.d/common-password
+
+##Hashing Algorithm
+echo "Copy this text to the correct location in /etc/pam.d/common-password:
+
+password [success=1 default=ignore] pam_unix.so obscure use_authtok sha512 shadow"
+
+read -p "Press any key when ready to open the file in nano. You won't be able to go back without restarting the script."
+nano /etc/pam.d/common-password
+
+#Password expiration
+echo "Change the values of 
+PASS_MAX_DAYS
+PASS_MIN_DAYS
+PASS_MIN_LEN
+PASS_WARN_AGE
+in the file /etc/login.defs"
+
+read -p "Press any key when ready to open the file in nano. You won't be able to go back without restarting the script."
+nano /etc/login.defs
+
+

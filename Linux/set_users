@@ -1,0 +1,15 @@
+#!/bin/bash
+#Run as root
+#Usage: ./set_users username password
+
+username = $1
+password = $2
+
+passwd $username $password              #Changes password of $username to $password
+
+chage -m 7 -M 45 -I 10 -W 14 $username  #Sets password policy
+                                        #7 min days, 45 max days, 10 days inactiviy
+                                        #after pass expires will be locked. Warn 14
+                                        #days before expiration.
+chage -l $username                      #Make sure it is the same.
+
